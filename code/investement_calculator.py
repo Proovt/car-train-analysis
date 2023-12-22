@@ -6,12 +6,16 @@ from math import ceil
 
 rates_comparison_file = "rates_per_vehicle.json"
 
-rate_suffix = " per km"
+km_suffix = " km"
+rate_suffix = " per" + km_suffix
 unit_suffix = " unit"
 
 # vehicles subdict of rates
 car_vehicles = "car"
 train_vehicles = "train"
+
+# distance attribute to calculated rates
+distance_attribute = "distance"
 
 # plot parameters
 fig_size = (12, 6)
@@ -58,18 +62,46 @@ def calculate_for_distance(distance: int, rates: dict[str, dict[str, dict[str, f
         vehicle: define if rate should be calculated for trains or different car vehicles. Either 'car' or 'train'.
 
     Outputs:
-        vehicle_rates - A nested dictionary containing rates for each vehicle type and category.
-        rate_units - A dictionary containing the unit for each rate type.
+        calculated vehicle rates - A nested dictionary containing the calculated values for the distance * rate.
      """
     return {vehicle_type : {rate_key.replace(rate_suffix, '') : rate * distance for rate_key, rate in vehicle_rates.items()} for vehicle_type, vehicle_rates in rates[vehicle].items()}
 
-def plot_bar_char(data_dict: dict[str, dict[str, int]], vehicle_units: dict[str, str]):
+def add_distances_to_calculated_rates(train_distance: int, car_distance: int, calculated_rates_per_vehicle: dict[str, dict[str, float]], rates_per_vehicle: dict[str, dict[str, dict[str, float]]], rates_units: dict[str, str]) -> dict[str, dict[str, str]]:
+    """
+    Adds distances to the calculated rates for each vehicle and converts values to strings with units.
+
+    Inputs:
+        train_distance - The distance covered by train.
+        car_distance - The distance covered by car.
+        calculated_rates_per_vehicle - The pre-calculated rates for each vehicle.
+        rates_per_vehicle - The rates for different vehicles.
+        rates_units - The units for each rate type.
+
+    Outputs:
+        output_calculated_rates - A dictionary with the calculated rates and distances, formatted as strings with units.
+    """
+    output_calculated_rates = calculated_rates_per_vehicle.copy()
+
+    for vehicle_type, calculated_rates in calculated_rates_per_vehicle.items():
+        # convert to str and add units
+        for calculated_rate_name, calculated_rate in calculated_rates.items():
+            calculated_rates[calculated_rate_name] = f"{calculated_rate:.2f} {rates_units[calculated_rate_name + unit_suffix]}"
+
+        # add distances of trip specific to vehicle 
+        if vehicle_type in rates_per_vehicle[train_vehicles].keys():
+            calculated_rates.update({distance_attribute: f"{train_distance}{km_suffix}"})
+        elif vehicle_type in rates_per_vehicle[car_vehicles].keys():
+            calculated_rates.update({distance_attribute: f"{car_distance}{km_suffix}"})
+
+    return output_calculated_rates
+
+def plot_bar_char(data_dict: dict[str, dict[str, int]], rate_units: dict[str, str]):
     """
     Plots a bar chart for each rate type across different vehicle types using the provided data.
 
     Inputs:
         data_dict - A dictionary containing the calculated rates for each vehicle type.
-        vehicle_units - A dictionary containing the units for each rate type.
+        rate_units  - A dictionary containing the units for each rate type.
     """
     vehicle_types = list(data_dict.keys())
     vehicle_types_len = len(vehicle_types)
@@ -106,7 +138,7 @@ def plot_bar_char(data_dict: dict[str, dict[str, int]], vehicle_units: dict[str,
         
         cur_ax.set_xlabel('Vehicle Type', fontsize=subtitle_font_size)
         # y label displays units
-        cur_ax.set_ylabel(vehicle_units[calculated_rates_names[i] + unit_suffix])
+        cur_ax.set_ylabel(rate_units[calculated_rates_names[i] + unit_suffix])
         cur_ax.set_xticks(pos, vehicle_types, fontsize=text_font_size)
         cur_ax.set_title(calculated_rates_names[i], fontsize=title_font_size)
 
@@ -115,7 +147,7 @@ def plot_bar_char(data_dict: dict[str, dict[str, int]], vehicle_units: dict[str,
         
     plt.show()
 
-def calculate_rates(vehicle_rates: dict[str, dict[str, dict[str, float]]], train_distance: int, car_distance: int) -> dict[str, dict[str, float]]:
+def calculate_rates(rates_per_vehicle: dict[str, dict[str, dict[str, float]]], train_distance: int, car_distance: int) -> dict[str, dict[str, float]]:
     """
     Calculates the rates for both train and car vehicles over specified distances.
 
@@ -128,8 +160,8 @@ def calculate_rates(vehicle_rates: dict[str, dict[str, dict[str, float]]], train
         total_calculated_rates - A dictionary containing the calculated rates for both train and car vehicles.
     """
     # calculates first for train, then gets updated to include the calculated rates for the car vehicles
-    total_calculated_rates = calculate_for_distance(train_distance, vehicle_rates, train_vehicles)
-    car_calculated_rates = calculate_for_distance(car_distance, vehicle_rates, car_vehicles)
+    total_calculated_rates = calculate_for_distance(train_distance, rates_per_vehicle, train_vehicles)
+    car_calculated_rates = calculate_for_distance(car_distance, rates_per_vehicle, car_vehicles)
 
     total_calculated_rates.update(car_calculated_rates)
 

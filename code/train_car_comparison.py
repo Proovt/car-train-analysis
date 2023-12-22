@@ -2,8 +2,14 @@ import numpy as np
 import astar_lib
 import parameters
 import maze_plot
+import json
+import sys
 
+from pathlib import Path
 from parameters import NodePos, params_dir
+
+ROOT = Path(sys.path[0]).parent
+output_dir = ROOT.joinpath("output-data")
 
 # determined factor to approximate the real distance
 DISTANCE_SCALE_FACTOR = 1.7241
@@ -30,6 +36,12 @@ train_car_parameter_file = "train_car_comparison.json"
 # parameter city names in train_car_comparison.json
 start_city_name = "start_city"
 end_city_name = "end_city"
+
+# output data attribute names
+output_distance = "distance"
+output_time = "time"
+output_faster_network = "time efficient"
+km_unit = " km"
 
 """ data preparation """
 
@@ -95,7 +107,7 @@ def destinations(startpoint_name: str, endpoint_name: str, cities: dict[str, Nod
     return start, end
 
 # loads in the departure and end city
-def load_destinations(filename: str, cities: dict[str, NodePos]) -> tuple[NodePos, NodePos]:
+def load_destinations(filename: str, cities: dict[str, NodePos]) -> tuple[str, str, NodePos, NodePos]:
     """
     Loads start and end city destinations from a JSON file and verifies their existence in the provided cities dictionary.
 
@@ -104,7 +116,9 @@ def load_destinations(filename: str, cities: dict[str, NodePos]) -> tuple[NodePo
         cities - A dictionary of city names and their NodePos objects.
 
     Outputs:
-        start, end - The start and end NodePos objects for the destinations.
+        - The names of the start and end city
+        - The start and end NodePos objects for the destinations.
+        - Everything together as a tuple
     """
     with open(params_dir.joinpath(filename), 'r') as f:
         params = parameters.read_params(f)
@@ -120,7 +134,7 @@ def load_destinations(filename: str, cities: dict[str, NodePos]) -> tuple[NodePo
             raise KeyError(f"The arrival city {end_city_name} does not exist!")
         
         
-        return destinations(start_city, end_city, cities)
+        return start_city, end_city, *destinations(start_city, end_city, cities)
 
 
 """ output data analysis """
@@ -186,7 +200,7 @@ def calculate_fast_route_proportion(slow_solved_maze: np.ndarray, fast_unsolved_
 
 """" simulation"""
 
-def vehicle_analysis(start: NodePos, end: NodePos, slow_maze: np.ndarray, fast_maze: np.ndarray, slow_title: str, fast_title: str, slow_speed: float, fast_speed: float) -> tuple[str, np.ndarray, int, int, int]:
+def vehicle_analysis(start: NodePos, end: NodePos, slow_maze: np.ndarray, fast_maze: np.ndarray, slow_title: str, fast_title: str, slow_speed: float, fast_speed: float) -> tuple[str, np.ndarray, int, int, int, dict]:
     """
     Analyzes and compares two transportation networks (e.g., rail vs. car) to determine the most efficient route in terms of time. The function performs the following steps:
     1. Run the A* algorithm on both the 'slow' and 'fast' mazes, representing two different transportation networks. The 'slow' network could be, for instance, regional train lines, while the 'fast' network could represent intercity train lines or highways.
@@ -205,11 +219,12 @@ def vehicle_analysis(start: NodePos, end: NodePos, slow_maze: np.ndarray, fast_m
         fast_speed - The average speed on the faster network.
 
     Outputs:
-        maze_title: str - The title of the chosen network based on time efficiency.
+        faster_maze_title: str - The title of the chosen network based on time efficiency.
         solved_rail_maze: np.ndarray - The solved maze of the chosen network.
         real_distance: int - The real-world distance of the chosen path.
         hours: int - The total hours for the journey.
         minutes: int - The remaining minutes for the journey.
+        data: dict - Dictionary containing information on the length and time of the chosen paths.
     """
     fast_distance, solved_fast_maze = astar_lib.py_run_astar(start, end, fast_maze)
     slow_distance, solved_slow_maze = astar_lib.py_run_astar(start, end, slow_maze)
@@ -229,32 +244,43 @@ def vehicle_analysis(start: NodePos, end: NodePos, slow_maze: np.ndarray, fast_m
     real_slow_distance = real_slow_slow_distance + real_slow_fast_distance
     slow_time_minutes = slow_time_slow_minutes + slow_time_fast_minutes
 
+    slow_hours, slow_minutes = minutes_to_hours_and_minutes(slow_time_minutes)
+
+
+    # prepare output data
+    data = {slow_title: {output_distance: f"{real_slow_distance}{km_unit}", output_time: f"{slow_hours}h {slow_minutes}min"}}
+
     # check if fast network did not find any path
     if fast_distance == -1:
         # add 1 to always make fast time bigger to force slow time to be returned
         fast_time_minutes = slow_distance + 1
+        data.update({fast_title: "No valid path found"})
     else:
         # everything went smoothly, continue calculating
         real_fast_distance, fast_time_minutes = real_rounded_distance_and_time(fast_distance, fast_speed)
+        fast_hours, fast_minutes = minutes_to_hours_and_minutes(fast_time_minutes)
+        data.update({fast_title: {output_distance: f"{real_fast_distance}{km_unit}", output_time: f"{fast_hours}h {fast_minutes}min"}})
 
     # return less time consuming path
     if fast_time_minutes <= slow_time_minutes:
         real_distance = real_fast_distance
         solved_rail_maze = solved_fast_maze
-        hours, minutes = minutes_to_hours_and_minutes(fast_time_minutes)
-        maze_title = fast_title
+        hours, minutes = fast_hours, fast_minutes
+        faster_maze_title = fast_title
 
         maze_plot.show_maze_comparison(solved_fast_maze, solved_slow_maze, fast_title, slow_title, DISTANCE_SCALE_FACTOR)
 
     else:
         real_distance = real_slow_distance
         solved_rail_maze = solved_slow_maze
-        hours, minutes = minutes_to_hours_and_minutes(slow_time_minutes)
-        maze_title = slow_title
+        hours, minutes = slow_hours, slow_minutes
+        faster_maze_title = slow_title
+        
+    data.update({output_faster_network: [faster_maze_title]})
 
-    return maze_title, solved_rail_maze, real_distance, hours, minutes
+    return faster_maze_title, solved_rail_maze, real_distance, hours, minutes, data
 
-def rail_analysis(start: NodePos, end: NodePos) -> tuple[str, np.ndarray, int, int, int]:
+def rail_analysis(start: NodePos, end: NodePos) -> tuple[str, np.ndarray, int, int, int, dict]:
     """
     Conducts an analysis of the rail network by comparing intercity and regional train lines to find the optimal route.
 
@@ -263,14 +289,14 @@ def rail_analysis(start: NodePos, end: NodePos) -> tuple[str, np.ndarray, int, i
         end - The ending position for the analysis, also represented as a NodePos object.
 
     Outputs:
-        A tuple containing the results of the rail analysis, including the chosen network, the solved maze, the real-world distance, and the time for the journey in hours and minutes.
+        A tuple containing the results of the rail analysis, including the chosen network, the solved maze, the real-world distance, the time for the journey in hours and minutes, and a data dict where these values are stored.
     """
     ic_maze = astar_lib.load_maze(intercity_rail_network_maze_file)
     regio_maze = astar_lib.load_maze(rail_network_maze_file)
 
     return vehicle_analysis(start, end, regio_maze, ic_maze, "Regional Train Lines", "Intercity Train Lines", REGIO_TRAIN_SPEED, INTERCITY_TRAIN_SPEED)
 
-def car_analysis(start: NodePos, end: NodePos) -> tuple[str, np.ndarray, int, int, int]:
+def car_analysis(start: NodePos, end: NodePos) -> tuple[str, np.ndarray, int, int, int, dict]:
     """
     Conducts an analysis of the car network by comparing highways and main roads to find the optimal route.
 
@@ -279,9 +305,24 @@ def car_analysis(start: NodePos, end: NodePos) -> tuple[str, np.ndarray, int, in
         end - The ending position for the analysis, also represented as a NodePos object.
 
     Outputs:
-        A tuple containing the results of the car analysis, including the chosen network, the solved maze, the real-world distance, and the time for the journey in hours and minutes.
+        A tuple containing the results of the car analysis, including the chosen network, the solved maze, the real-world distance, the time for the journey in hours and minutes, and a data dict where these values are stored.
     """
     highway_maze = astar_lib.load_maze(highway_maze_file)
     road_maze = astar_lib.load_maze(road_maze_file)
 
     return vehicle_analysis(start, end, road_maze, highway_maze, "Main Roads", "Highways", MAIN_ROAD_CAR_SPEED, HIGHWAY_CAR_SPEED)
+
+"""" outputs """
+
+def save_outputs(filename: str, data: dict) -> None:
+    """
+    Saves the given data as a JSON string in a file.
+
+    Inputs:
+        filename - The name of the file to save the data to.
+        data - The data to be saved, provided as a dictionary.
+    """
+    json_string = json.dumps(data)
+
+    with open(output_dir.joinpath(filename), 'w') as f:
+        f.write(json_string)

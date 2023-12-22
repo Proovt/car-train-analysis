@@ -49,11 +49,22 @@ def run_rail_car_comparison():
     Runs a comparison between rail and car travel to find the least time-consuming path. It loads city locations, analyzes both rail and car networks, prints the results, and plots a comparison chart.
     """
     cities = comparison.load_maze_locations(cities_file)
-    start, end = comparison.load_destinations(comparison.train_car_parameter_file, cities)
+    start_name, end_name, start, end = comparison.load_destinations(comparison.train_car_parameter_file, cities)
 
-    rail_title, solved_rail_maze, rail_real_distance, rail_hours, rail_minutes = comparison.rail_analysis(start, end)
-    car_title, solved_car_maze, car_real_distance, car_hours, car_minutes = comparison.car_analysis(start, end)
+    data = {"Start City": start_name, "End City": end_name}
+
+    rail_title, solved_rail_maze, rail_real_distance, rail_hours, rail_minutes, rail_data = comparison.rail_analysis(start, end)
+    car_title, solved_car_maze, car_real_distance, car_hours, car_minutes, car_data = comparison.car_analysis(start, end)
     
+    # combine rail and car data
+    data.update(rail_data)
+
+    faster_car_route = car_data.pop(comparison.output_faster_network)
+    data.update(car_data)
+
+    # add the fast car route without overriding the fast train route
+    data[comparison.output_faster_network] += faster_car_route
+
     print(" === Train ===")
     print_results(rail_title, rail_real_distance, rail_hours, rail_minutes)
     
@@ -64,10 +75,18 @@ def run_rail_car_comparison():
     
     maze_plot.show_maze_comparison(solved_rail_maze, solved_car_maze, rail_title, car_title, comparison.DISTANCE_SCALE_FACTOR)
     
-    vehicle_rates, vehicle_units = investement_calculator.load_vehicle_rates_and_units()
-    combined_calculated_rates = investement_calculator.calculate_rates(vehicle_rates, rail_real_distance, car_real_distance)
+    rates_per_vehicle, rates_units = investement_calculator.load_vehicle_rates_and_units()
+    combined_calculated_rates = investement_calculator.calculate_rates(rates_per_vehicle, rail_real_distance, car_real_distance)
 
-    investement_calculator.plot_bar_char(combined_calculated_rates, vehicle_units)
+    investement_calculator.plot_bar_char(combined_calculated_rates, rates_units)
+    # print(combined_calculated_rates, rates_per_vehicle, rates_units)
+    output_data = investement_calculator.add_distances_to_calculated_rates(rail_real_distance, car_real_distance, combined_calculated_rates, rates_per_vehicle, rates_units)
+
+    data.update(output_data)
+
+    # save outputs to file
+    output_filename = f"{start_name}-{end_name}_data.json"
+    comparison.save_outputs(output_filename, data)
 
 # function to run the conversion from image to csv file usable for the algorithm
 def run_maze_converter():
