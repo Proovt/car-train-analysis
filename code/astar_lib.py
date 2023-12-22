@@ -28,6 +28,13 @@ run_astar = None
 """ define useful structs used to pass to the C program """
 
 class Pos(Structure):
+    """
+    Represents a 2D position or coordinate in a grid or maze.
+
+    Attributes:
+        x (c_int): The x-coordinate in the grid.
+        y (c_int): The y-coordinate in the grid.
+    """
     _fields_ = [
         ('x', c_int),
         ('y', c_int)
@@ -38,6 +45,14 @@ class Pos(Structure):
         self.y = y
 
 class Cost(Structure):
+    """
+    Encapsulates the costs associated with a node in pathfinding algorithms.
+
+    Attributes:
+        G_cost (c_int): The movement cost from the start node to the current node.
+        H_cost (c_int): The estimated movement cost from the current node to the end node (heuristic).
+        F_cost (c_int): The total cost (F = G + H).
+    """
     _fields_ = [
         ('G_cost', c_int),
         ('H_cost', c_int),
@@ -45,10 +60,28 @@ class Cost(Structure):
     ]
 
 class Node(Structure):
+    """
+    Represents a node in a pathfinding graph.
+
+    Attributes:
+        parent (Node): A pointer to the parent node in the path.
+        pos (Pos): The position of the node in the graph.
+        cost (Cost): The costs associated with the node.
+        walkState (c_int): The current state of the node (e.g., UNREACHABLE, WALKABLE).
+    """
     def __init__(self, x: int, y: int, walkState: int) -> None:
+        """
+        Initializes a new Node instance.
+
+        Inputs:
+            x: The x-coordinate of the node.
+            y: The y-coordinate of the node.
+            walkState: The walkability state of the node.
+        """
         self.pos = Pos(x, y)
         self.walkState = walkState
 
+# creates the associated fields for the Node class
 Node._fields_ = [
         ('parent', POINTER(Node)),
         ('pos', Pos),
@@ -164,11 +197,17 @@ def mazeFromNodes(nodes, shape) -> np.ndarray:
 
 # function to initialize the shared library from the C code
 def load_library():
+    """
+    Loads the A* algorithm library and sets up the 'run_astar' function pointer. The function dynamically loads the compiled C library and configures the argument and return types for the 'run_astar' function.
+
+    Raises:
+        FileNotFoundError: If the library file does not exist.
+    """
     # modify global variable
     global run_astar
 
     # for UNIX users
-    # lib_path = ROOT.joinpath("mylib.so")
+    # lib_path = ROOT.joinpath(LIB_NAME + ".so")
     lib_path = code_dir.joinpath(LIB_NAME + ".dll")
 
     if(not exists(lib_path)):

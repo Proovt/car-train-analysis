@@ -18,20 +18,42 @@ typedef struct Node Node;
 typedef struct Cost Cost;
 typedef struct Pos Pos;
 
-// Position structure representing a 2D coordinate
+/*
+ * Represents a 2D position or coordinate in a grid or maze.
+ *
+ * Attributes:
+ *     x (int): The x-coordinate in the grid.
+ *     y (int): The y-coordinate in the grid.
+ */
 struct Pos {
     int x;
     int y;
 };
 
-// Cost structure representing the costs associated with moving to a node
+/*
+ * Encapsulates the costs associated with a node in pathfinding algorithms.
+ * Cost structure representing the costs associated with moving to a node
+ *
+ * Attributes:
+ *     G_cost (int): The movement cost from the start node to the current node.
+ *     H_cost (int): The estimated movement cost from the current node to the end node (heuristic).
+ *     F_cost (int): The total cost (F = G + H).
+ */
 struct Cost {
     int G_cost;  // Movement cost from the start node to the current node
     int H_cost;  // Estimated movement cost from the current node to the end node (heuristic)
     int F_cost;  // Total cost (F = G + H)
 };
 
-// Node structure representing a node in the pathfinding graph
+/*
+ * Represents a node in a pathfinding graph.
+ *
+ * Attributes:
+ *     parent (Node*): A pointer to the parent node in the path.
+ *     pos (Pos): The position of the node in the graph.
+ *     cost (Cost): The costs associated with the node.
+ *     walkState (int): The current state of the node (e.g., UNREACHABLE, WALKABLE).
+ */
 struct Node {
     Node *parent;  // Pointer to parent node in the path
     Pos pos;       // Position of the node

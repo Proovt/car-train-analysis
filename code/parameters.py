@@ -6,7 +6,7 @@ from pathlib import Path
 
 ## https://github.com/stakahama/sie-eng270-projectexample/blob/main/code/simulategrid.py
 ROOT = Path(sys.path[0]).parent
-params_dir = ROOT.joinpath("parameters")
+params_dir = ROOT.joinpath("maze-parameters")
 
 # https://stackoverflow.com/questions/10252010/serializing-class-instance-to-json
 # https://stackoverflow.com/questions/5160077/encoding-nested-python-object-in-json
@@ -14,19 +14,76 @@ params_dir = ROOT.joinpath("parameters")
 # serves as abstract class to be called by JsonObjectHandler
 # used to easily serialize and deserialize classes to and from JSON-files
 class Jasonable():
+    """
+    This is the serializable super class to be inherited by other classes.
+
+    Methods:
+        jsonable: returns the vars dict of the class.
+    """
     def jsonable(self) -> dict:
+        """
+        Is used to serialize the attributes of the class.
+
+        Outputs:
+            The vars dict of the class.
+        """
         return vars(self)
 
 class NodePos(Jasonable):
+    """
+    Represents a 2D coordinate in a maze or grid.
+    Inherits from Jasonable to make this class serializable in a .json file.
+
+    Attributes:
+        x (float): The x-coordinate.
+        y (float): The y-coordinate.
+
+    Methods:
+        __init__: Initializes a new instance of NodePos.
+        get_pos: Returns a tuple of the x and y coordinates.
+    """
     def __init__(self, x: float, y: float) -> None:
+        """
+        Initializes a new NodePos instance.
+
+        Inputs:
+            x: The x-coordinate.
+            y: The y-coordinate.
+        """
         self.x = x
         self.y = y
 
     def get_pos(self) -> tuple[float, float]:
+        """
+        Retrieves the position as a tuple.
+
+        Outputs:
+            A tuple containing the x and y coordinates.
+        """
         return self.x, self.y
 
 class MazeParameter(Jasonable):
+    """
+    Encapsulates parameters for a maze configuration.
+
+    Attributes:
+        maze_name (str): The name of the maze file.
+        extension (str): The file extension of the maze file.
+        start_point (NodePos): The starting position in the maze.
+        end_point (NodePos): The ending position in the maze.
+
+    Methods:
+        __init__: Initializes a new instance of MazeParameter.
+    """
     def __init__(self, maze_file: str, start_point: NodePos, end_point: NodePos) -> None:
+        """
+        Initializes a new MazeParameter instance.
+
+        Inputs:
+            maze_file: The file name of the maze, including the extension.
+            start_point: The starting position in the maze.
+            end_point: The ending position in the maze.
+        """
         # find last index of '.' to extract extension
         extension_idx = maze_file.rfind('.')
         

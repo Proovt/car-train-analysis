@@ -14,12 +14,13 @@ car_vehicles = "car"
 train_vehicles = "train"
 
 # plot parameters
-fig_size = (8, 6)
+fig_size = (12, 6)
 gap_space = .5
 title_font_size = 14
 subtitle_font_size = 11
 text_font_size = 8
 bar_width = 0.5
+maximum_plots_for_1_line = 3
 
 def load_vehicle_rates_and_units() -> tuple[dict[str, dict[str, dict[str, float]]], dict[str, str]]:
     """
@@ -89,8 +90,12 @@ def plot_bar_char(data_dict: dict[str, dict[str, int]], vehicle_units: dict[str,
     
     pos = np.arange(vehicle_types_len)
 
-    plots_per_line = ceil(calculated_rates_len / 2)
-    fig, axs = plt.subplots(2, plots_per_line, figsize=fig_size)
+    # responsive plot sizes, creates 1 line with up to maximum_plots_for_1_line plots
+    # starting from maximum_plots_for_1_line + 1 plots it creates 2 lines with the according number of plots per line
+    # maximum_plots_for_1_line is set to 3
+    plots_per_line = ceil(calculated_rates_len / 2) if calculated_rates_len > maximum_plots_for_1_line else calculated_rates_len
+    lines = 2 if calculated_rates_len > maximum_plots_for_1_line else 1
+    fig, axs = plt.subplots(lines, plots_per_line, figsize=fig_size)
     
     # https://stackoverflow.com/questions/6541123/improve-subplot-size-spacing-with-many-subplots
     fig.subplots_adjust(hspace=gap_space, wspace=gap_space)

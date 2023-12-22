@@ -11,7 +11,7 @@ This project was created for the university EPFL during the course Computational
 - matplotlib: version 3.8.0
 - pillow: version 10.0.1
 
-### C:
+### C
 - gcc: version 13.2.0
 - Target: x86_64-w64-mingw32 (64 bit version)
 
@@ -28,16 +28,17 @@ This project was created for the university EPFL during the course Computational
 - **Customizable Parameters**: Allows user-defined settings for destination configurations, Price, Emissions and Energy Consumption per distance.
 - **Image to Maze Conversion**: Converts black and white images to maze representations for solving.
 
-## Compilation and Usage
+## Installation, Compilation And Usage
+- run ``git clone https://github.com/Proovt/car-train-analysis`` to 
 - The C code was written on a Windows machine. Therefore the program is targetted to only windows machines and is only tested on windows machines.
 - To use the program first compile the C library by navigating to the code folder ``cd code/``. Then compile the C code as a shared library: ``gcc -shared -o a-star.dll .\a-star.c``. Maybe the ``-m64`` flag is needed to force a 64-bit compilation.
 - To run the code navigate back to the root folder ``cd ..`` and run the batch file using ``.\run.bat``
 
 ## Program Procedure
 When the program gets run the user is greeted with a CLI to choose between 3 different 'modes' to run different parts of the program and one entry to exit the program.
-- The first mode (enter: 0) is the Maze Solving Part, where the user can define the parameters in the file ``parameters/maze.json``. The parameters include the filename of the maze in the ``maze/`` folder. Preferrably, use .csv files. Furthermore, you can enter a starting position and an end position from where to where the algorithm should try to find a path.
+- The first mode (enter: 0) is the Maze Solving Part, where the user can define the parameters in the file ``maze-parameters/maze.json``. The parameters include the filename of the maze in the ``maze/`` folder. Preferrably, use .csv files. Furthermore, you can enter a starting position and an end position from where to where the algorithm should try to find a path.
 - The second mode (enter: 1) consists of the trip analysis. 
-    - To change the outcome change the starting city and destination city in the file ``parameters/train_car_comparison.json``. The selectable cities are defined in the file ``parameters/cities.json``, which should not be changed. You can change the emission rate, energy consumption rate and price rate in the file ``parameters/cities.json``, where you can change the rates for each vehicle or add new vehicles and rates. For each new rate a unit like the other per km e. g. ``kg CO2 / km`` must be provided in this file.
+    - To change the outcome change the starting city and destination city in the file ``maze-parameters/train_car_comparison.json``. The selectable cities are defined in the file ``maze-parameters/cities.json``, which should not be changed. You can change the emission rate, energy consumption rate and price rate in the file ``maze-parameters/cities.json``, where you can change the rates for each vehicle or add new vehicles and rates. For each new rate a unit like the other per km e. g. ``kg CO2 / km`` must be provided in this file.
     - First the start and end positions are loaded in the main file, then the an analysis is called for the car network and train network with the corresponding function from the train_car_comparison module. For both a the astar algorithm written in C is called twice using the ``py_run_astar`` function of the astar_lib module to calculate the shortest path for a faster but longer highway/ intercity network and is compared to a slower main road/regional train network.
     - Those networks were taken from map.geo.admin.ch and then loaded change to csv with this program.
     - The distance calculated by the algorithm is not to scale. This was overcome by measuring the scale provided by the maps with the algorithm and determining a scaling factor which is ``DISTANCE_SCALE_FACTOR = 1.7241``.
@@ -65,7 +66,7 @@ Regional Trains (RE) vary even more. Very slow mountain climbing trains drive as
 ### Emissions, Energy Consumption, Price Parameters
 - CO2: The values for the train and EV were taken from this article[^30]. CO2 emissions for combustion cars were found here[^40].
 - Energy Consumption: Tesla Model 3: 0.137 kWh/km [^70]. Skoda Octavia (Exact Model: Skoda Octavia 2019 2.0 TSI 4x4 AT): 0.076 L/km [^80] * 8.5 kWh/L (Liter benzene to kWh)[^90] = 0.646 kWh/km. The train uses between 9,8 kWh and 11,86 kWh / 100 km, I use the value 0.01 kWh / km [^100].
-- Costs: 1.78 CHF/Liter benzene, cost for energy 0.27 CHF/kWh[^50]. The most sold vehicles were Skoda Octavia and Tesla Model 3 which are used for the energy consumption[^60]. Tesla: 0.27 CHF/kWh * 0.137 kWh/km = 0.037 CHF/km. Skoda: 1.78 CHF/L * 0.076 L/km = 0.135 CHF/km. The train costs are calculated using Bern to Lausanne as a reference. The train line is 97.2 km and cost 36 CHF, therefore 36 / 97.2 = 0.37 CHF/km
+- Costs: 1.78 CHF/Liter benzene, cost for energy 0.27 CHF/kWh[^50]. The most sold vehicles were Skoda Octavia and Tesla Model 3 which are used for the energy consumption[^60]. Tesla: 0.27 CHF/kWh * 0.137 kWh/km = 0.037 CHF/km. Skoda: 1.78 CHF/L * 0.076 L/km = 0.135 CHF/km. The train costs are calculated using Bern to Lausanne as a reference. The train line is 97.2 km and cost 36 CHF, therefore 36 / 97.2 = 0.37 CHF/km.
 
 ## Code Source
 Help with commenting and documenting was provided by ChatGPT[^1][^2].
