@@ -166,13 +166,3 @@ def calculate_rates(rates_per_vehicle: dict[str, dict[str, dict[str, float]]], t
     total_calculated_rates.update(car_calculated_rates)
 
     return total_calculated_rates
-
-# test functionality
-if __name__ == '__main__':
-    vehicle_rates, vehicle_units = load_vehicle_rates_and_units()
-    dst = 346
-    a = calculate_for_distance(dst, vehicle_rates, train_vehicles)
-    b = calculate_for_distance(dst, vehicle_rates, car_vehicles)
-    a.update(b)
-
-    plot_bar_char(a, vehicle_units)

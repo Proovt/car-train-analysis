@@ -72,30 +72,3 @@ def test():
     # https://stackoverflow.com/questions/42150110/comparing-subarrays-in-numpy
     sol = np.logical_and.reduce(c[:, :3] == b, axis = -1)
     print(sol)
-
-if __name__ == "__main__":
-    im = Image.open(ROOT.joinpath("edited-main-roads.png"))
-
-    # https://stackoverflow.com/questions/11064786/get-pixels-rgb-using-pil
-    # convert image to hsv to filter red pixels
-    hsv_im = im.convert('HSV')
-    hsv_arr = np.array(hsv_im)
-
-    # https://stackoverflow.com/questions/51225657/detect-whether-a-pixel-is-red-or-not
-    # create mask for red pixels
-    lower_red = np.array([0,1,1])
-    upper_red = np.array([250,255,255])
-
-    masked_arr_lower = (hsv_arr[:,:,0] >= lower_red[0]) & (hsv_arr[:,:,1] >= lower_red[1]) & (hsv_arr[:,:,2] >= lower_red[2]) & \
-                (hsv_arr[:,:,0] <= upper_red[0]) & (hsv_arr[:,:,1] <= upper_red[1]) & (hsv_arr[:,:,2] <= upper_red[2])
-
-    lower_red = np.array([250,1,1])
-    upper_red = np.array([360,255,255])
-
-    masked_arr_upper = (hsv_arr[:,:,0] >= lower_red[0]) & (hsv_arr[:,:,1] >= lower_red[1]) & (hsv_arr[:,:,2] >= lower_red[2]) & \
-                (hsv_arr[:,:,0] <= upper_red[0]) & (hsv_arr[:,:,1] <= upper_red[1]) & (hsv_arr[:,:,2] <= upper_red[2])
-
-    masked_arr = masked_arr_lower | masked_arr_upper
-    masked_arr[:100, :150] = False
-
-    Image.fromarray((masked_arr * 255).astype(np.uint8)).save(ROOT.joinpath("only-main-roads.png"))

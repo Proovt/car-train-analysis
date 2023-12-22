@@ -114,8 +114,8 @@ modes = [
 ]
 
 if __name__ == '__main__':
+    try:
         astar_lib.load_library()
-    # try:
         maze_cli.run(modes)
-    # except Exception as e:
-        # print(e)
+    except Exception as e:
+        print(e)
