@@ -1,0 +1,24 @@
+{
+    "train": {
+        "Train": {
+            "Emissions per km": 0.008,
+            "Energy per km": 0.01,
+            "Price per km": 0.37
+        }
+    },
+    "car": {
+        "Tesla Model 3": {
+            "Emissions per km": 0.089,
+            "Energy per km": 0.037,
+            "Price per km": 0.037
+        },
+        "Skoda Octavia": {
+            "Emissions per km": 0.121,
+            "Energy per km": 0.646,
+            "Price per km": 0.135
+        }
+    },
+    "Emissions unit": "kg CO2",
+    "Price unit": "CHF",
+    "Energy unit": "kWh"
+}
