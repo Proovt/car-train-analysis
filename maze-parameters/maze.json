@@ -1,5 +1,5 @@
 {
-    "maze_name": "50km-scale-line-to-measure.csv", 
-    "start_point": {"x": 0, "y": 0}, 
-    "end_point": {"x": 29, "y": 0}
+    "maze_name": "sample-maze.csv", 
+    "start_point": {"x": 199, "y": 193}, 
+    "end_point": {"x": 100, "y": 100}
 }

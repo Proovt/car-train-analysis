@@ -39,7 +39,7 @@ def run_maze_solver():
     maze_params = params.load_params(maze_parameter_file)
     maze = astar_lib.load_maze(maze_params.maze_name + maze_params.extension)
     distance, solved_maze = astar_lib.py_run_astar(maze_params.start_point, maze_params.end_point, maze)
-    print(f"The covered distance was {distance}.")
+    print(f"The covered distance was {distance:.1f} units.")
     maze_plot.show_maze(solved_maze)
 
 # function to run the car train comparison to find the least time consuming path

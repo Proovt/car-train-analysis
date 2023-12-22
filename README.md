@@ -37,6 +37,7 @@ This project was created for the university EPFL during the course Computational
 ## Program Procedure
 When the program gets run the user is greeted with a CLI to choose between 3 different 'modes' to run different parts of the program and one entry to exit the program.
 - The first mode (enter: 0) is the Maze Solving Part, where the user can define the parameters in the file ``maze-parameters/maze.json``. The parameters include the filename of the maze in the ``maze/`` folder. Preferrably, use .csv files. Furthermore, you can enter a starting position and an end position from where to where the algorithm should try to find a path.
+    - A sample maze is provided that stems from an image taken from here[^8]. The image was scaled down by a factor of 20, to make sure the solution path is visible and the correct starting and ending positions are entered.
 - The second mode (enter: 1) consists of the trip analysis. 
     - To change the outcome change the starting city and destination city in the file ``maze-parameters/train_car_comparison.json``. The selectable cities are defined in the file ``maze-parameters/cities.json``, which should not be changed. You can change the emission rate, energy consumption rate and price rate in the file ``maze-parameters/cities.json``, where you can change the rates for each vehicle or add new vehicles and rates. For each new rate a unit like the other per km e. g. ``kg CO2 / km`` must be provided in this file.
     - First the start and end positions are loaded in the main file, then the an analysis is called for the car network and train network with the corresponding function from the train_car_comparison module. For both a the astar algorithm written in C is called twice using the ``py_run_astar`` function of the astar_lib module to calculate the shortest path for a faster but longer highway/ intercity network and is compared to a slower main road/regional train network.
@@ -91,3 +92,4 @@ Many little code snippets were found on stackoverflow. The links are always dire
 [^100]: https://www.energate-messenger.ch/news/223930/stromverbrauch-e-auto-mit-zwei-fahrgaesten-mit-bahn-vergleichbar
 [^1]: https://chat.openai.com/share/27fb2015-4258-46c7-8521-c485b708c617
 [^2]: https://chat.openai.com/share/2674b15d-0349-481f-9743-ba00a26bc618
+[^8]: https://webstockreview.net/explore/maze-clipart-childrens/
