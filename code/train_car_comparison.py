@@ -25,6 +25,7 @@ MAIN_ROAD_CAR_SPEED = 80 # km/h
 # file names of csv files containing each one solvable maze
 # 0 defines obstacle
 # 1 (or any other value) defines a walkable node where the algorithm can pass
+# includes all intercity (and interregio) train lines, which are treated as equal
 intercity_rail_network_maze_file = "intercity-interregio-network.csv"
 rail_network_maze_file = "railnetwork.csv"
 road_maze_file = "roadnetwork.csv"

@@ -1,3 +1,4 @@
 /report
 /map-geo
 /__pycache__
+*.dll
