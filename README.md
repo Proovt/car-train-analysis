@@ -76,6 +76,9 @@ Regional Trains (RE) vary even more. Very slow mountain climbing trains drive as
 - Energy Consumption: Tesla Model 3: 0.137 kWh/km [^70]. Skoda Octavia (Exact Model: Skoda Octavia 2019 2.0 TSI 4x4 AT): 0.076 L/km [^80] * 8.5 kWh/L (Liter benzene to kWh)[^90] = 0.646 kWh/km. The train uses between 9,8 kWh and 11,86 kWh / 100 km, I use the value 0.01 kWh / km [^100].
 - Costs: 1.78 CHF/Liter benzene, cost for energy 0.27 CHF/kWh[^50]. The most sold vehicles were Skoda Octavia and Tesla Model 3 which are used for the energy consumption[^60]. Tesla: 0.27 CHF/kWh * 0.137 kWh/km = 0.037 CHF/km. Skoda: 1.78 CHF/L * 0.076 L/km = 0.135 CHF/km. The train costs are calculated using Bern to Lausanne as a reference. The train line is 97.2 km and cost 36 CHF, therefore 36 / 97.2 = 0.37 CHF/km.
 
+### map geo folder
+- Contains images used for the creation of the different networks (e.g. Highway Network).
+
 ## Code Source
 Help with commenting and documenting was provided by ChatGPT[^1][^2].
 Many little code snippets were found on stackoverflow. The links are always directly above the copied or modified code.
