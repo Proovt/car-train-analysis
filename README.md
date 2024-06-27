@@ -29,7 +29,7 @@ This project was created for the university EPFL during the course Computational
 - **Image to Maze Conversion**: Converts black and white images to maze representations for solving.
 
 ## Installation, Compilation And Usage
-- run ``git clone https://github.com/Proovt/car-train-analysis`` to 
+- Run ``git clone https://github.com/Proovt/car-train-analysis`` to clone the repository.
 - The C code was written on a Windows machine. Therefore the program is targetted to only windows machines and is only tested on windows machines.
 - To use the program first compile the C library by navigating to the code folder ``cd code/``. Then compile the C code as a shared library: ``gcc -shared -o a-star.dll .\a-star.c``. Maybe the ``-m64`` flag is needed to force a 64-bit compilation.
 - To run the code navigate back to the root folder ``cd ..`` and run the batch file using ``.\run.bat``
